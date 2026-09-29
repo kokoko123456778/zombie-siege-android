@@ -1,59 +1,7 @@
-name: build-apk
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch: {}
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Скачиваем SDL2 (ветка SDL2, официальный репозиторий)
-        uses: actions/checkout@v4
-        with:
-          repository: libsdl-org/SDL
-          ref: SDL2
-          path: SDL
-
-      - name: Скачиваем твою игру
-        uses: actions/checkout@v4
-        with:
-          path: game
-
-      - name: Готовим проект — кладём игру, чиним C++, права и разворот экрана
+- name: Ставим NDK (Android SDK на сервере уже установлен заранее)
         run: |
-          cd SDL/android-project
-          SRC=$(find ../../game -maxdepth 1 -name '*.cpp' | head -n 1)
-          echo "Файл игры: $SRC"
-          cp "$SRC" app/jni/src/zombie_siege_3d.cpp
-          sed -i 's/LOCAL_SRC_FILES := YourSourceHere.c/LOCAL_SRC_FILES := zombie_siege_3d.cpp/' app/jni/src/Android.mk
-          sed -i '/LOCAL_SRC_FILES/a LOCAL_CPPFLAGS := -std=c++14 -Wno-narrowing' app/jni/src/Android.mk
-          printf 'APP_STL := c++_shared\nAPP_PLATFORM := android-21\n' > app/jni/Application.mk
-          MANIFEST=app/src/main/AndroidManifest.xml
-          sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />\n\n    <application#' "$MANIFEST"
-          sed -i 's#<activity #<activity android:screenOrientation="landscape" #' "$MANIFEST"
-          echo "----- Android.mk -----"; cat app/jni/src/Android.mk
-          echo "----- Application.mk -----"; cat app/jni/Application.mk
-
-      - uses: actions/setup-java@v4
-        with: { distribution: temurin, java-version: '17' }
-
-      - name: Ставим NDK (Android SDK на сервере уже установлен заранее)
-        run: |
-          yes | sdkmanager --licenses --sdk_root="$ANDROID_SDK_ROOT" >/dev/null || true
-          yes | sdkmanager --install "ndk;25.2.9519653" --sdk_root="$ANDROID_SDK_ROOT"
+          SDKMGR=$(find "$ANDROID_SDK_ROOT/cmdline-tools" -name sdkmanager -type f | head -n 1)
+          echo "sdkmanager: $SDKMGR"
+          yes | "$SDKMGR" --licenses --sdk_root="$ANDROID_SDK_ROOT" >/dev/null || true
+          yes | "$SDKMGR" --install "ndk;25.2.9519653" --sdk_root="$ANDROID_SDK_ROOT"
           echo "ndk.dir=$ANDROID_SDK_ROOT/ndk/25.2.9519653" >> SDL/android-project/local.properties
-
-      - name: Собираем APK
-        working-directory: SDL/android-project
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
-
-      - name: Сохраняем APK
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: apk
-          path: SDL/android-project/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: ignore
