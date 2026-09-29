@@ -20,9 +20,11 @@ jobs:
         with:
           path: game
 
-      - name: Готовим проект — кладём игру, чиним C++, права и разворот экрана
+      - name: Готовим проект — кладём игру, чиним C++, права, разворот экрана и ссылку на SDL
         run: |
           cd SDL/android-project
+          ln -sfn ../../../ app/jni/SDL
+          ls -la app/jni/SDL
           SRC=$(find ../../game -maxdepth 1 -name '*.cpp' | head -n 1)
           echo "Файл игры: $SRC"
           cp "$SRC" app/jni/src/zombie_siege_3d.cpp
