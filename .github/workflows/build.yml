@@ -43,8 +43,8 @@ jobs:
           SDKMGR=$(find "$ANDROID_SDK_ROOT/cmdline-tools" -name sdkmanager -type f | head -n 1)
           echo "sdkmanager: $SDKMGR"
           yes | "$SDKMGR" --licenses --sdk_root="$ANDROID_SDK_ROOT" >/dev/null || true
-          yes | "$SDKMGR" --install "ndk;25.2.9519653" --sdk_root="$ANDROID_SDK_ROOT"
-          echo "ndk.dir=$ANDROID_SDK_ROOT/ndk/25.2.9519653" >> SDL/android-project/local.properties
+          yes | "$SDKMGR" --install "ndk;26.1.10909125" --sdk_root="$ANDROID_SDK_ROOT"
+          echo "ndk.dir=$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> SDL/android-project/local.properties
 
       - name: Собираем APK
         working-directory: SDL/android-project
