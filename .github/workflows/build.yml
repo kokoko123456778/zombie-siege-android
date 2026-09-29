@@ -22,9 +22,7 @@ jobs:
 
       - name: Кладём игру в проект SDL и правим Android.mk
         run: |
-          SRC=$(find game -maxdepth 1 -name '*.cpp' | head -n 1)
-          echo "Нашли файл игры: $SRC"
-          cp "$SRC" SDL/android-project/app/jni/src/zombie_siege_3d.cpp
+          cp game/zombie_siege_3d.cpp SDL/android-project/app/jni/src/zombie_siege_3d.cpp
           sed -i 's/LOCAL_SRC_FILES := YourSourceHere.c/LOCAL_SRC_FILES := zombie_siege_3d.cpp/' SDL/android-project/app/jni/src/Android.mk
 
       - uses: actions/setup-java@v4
